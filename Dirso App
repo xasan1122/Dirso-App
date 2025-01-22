@@ -1,0 +1,59 @@
+rname])
+    return jsonify({"error": "User not found"}), 404
+
+# Endpoint to perform an exchange
+@app.route('/exchange', methods=['POST'])
+def exchange():
+    data = request.json
+    username = data.get('username')
+    evc_amount = data.get('evc_amount')
+# Necessary imports for a money exchange app backend
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Simulated database for users and their balances
+database = {
+    "users": {
+        "abd": {
+            "evc_balance": 874.50,
+            "usdt_balance": 0.00
+        }
+    },
+    "exchange_rate": 0.4,  # 1 EVC = 0.4 USDT
+    "service_fee": 0.6    # 6% service fee
+}
+
+# Endpoint to check balance
+@app.route('/balance', methods=['GET'])
+def get_balance():
+    username = request.args.get('username')
+    if username in database['users']:
+        return jsonify(database['users'][use
+    if username not in database['users']:
+        return jsonify({"error": "User not found"}), 404
+
+    user = database['users'][username]
+
+    if evc_amount > user['evc_balance']:
+        return jsonify({"error": "Insufficient EVC balance"}), 400
+
+    # Calculate USDT received after fees
+    service_fee = evc_amount * database['service_fee']
+    net_amount = evc_amount - service_fee
+    usdt_received = net_amount * database['exchange_rate']
+
+    # Update user balances
+    user['evc_balance'] -= evc_amount
+    user['usdt_balance'] += usdt_received
+
+    return jsonify({
+        "evc_spent": evc_amount,
+        "service_fee": service_fee,
+        "usdt_received": usdt_received,
+        "new_balance": user
+    })
+
+# Main driver
+if __name__ == '__main__':
+    app.run(debug=True)
